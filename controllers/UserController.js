@@ -50,8 +50,25 @@ const getUserById = async (req, res) => {
 // @route PUT /api/user/:id
 // @access public
 const updateUser = async (req, res) => {
-    res.status(200).json({ message: "User updated Successfully" })
+    try {
+        const userId = req.params.id;
+        const { name, address, faculty } = req.body;
 
+        const checkIfUserExist = 'SELECT * from students WHERE id = ?';
+        const [userExist] = await db.query(checkIfUserExist, [userId]);
+        if (userExist.length === 0) {
+            res.status(404).json({ message: "User not found" })
+        } else {
+            console.log("data")
+            const updateSqlQuery = "UPDATE students SET name=?, address=?, faculty=? WHERE id=?";
+            const updatedData = await db.query(updateSqlQuery, [name, address, faculty, userId]);
+            res.status(200).json({ message: "User updated successfully" })
+        }
+
+    } catch (error) {
+        console.error("Error while fetching data", error)
+        res.status(500).json({ err: "Internal Server Error" })
+    }
 }
 
 
