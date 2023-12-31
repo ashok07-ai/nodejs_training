@@ -76,7 +76,24 @@ const updateUser = async (req, res) => {
 // @route DELETE /api/user/:id
 // @access public
 const deleteUser = async (req, res) => {
-    res.status(200).json({ message: "User deleted Successfully" })
+    try {
+        const userId = req.params.id;
+        const { name, address, faculty } = req.body;
+
+        const checkIfUserExist = 'SELECT * from students WHERE id = ?';
+        const [userExist] = await db.query(checkIfUserExist, [userId]);
+        if (userExist.length === 0) {
+            res.status(404).json({ message: "User not found" })
+        } else {
+            const sqlQuery = "DELETE from students WHERE id = ?";
+            await db.query(sqlQuery, [userId]);
+            res.status(200).json({ message: "User updated successfully" })
+        }
+
+    } catch (error) {
+        console.error("Error while fetching data", error)
+        res.status(500).json({ err: "Internal Server Error" })
+    }
 
 }
 
